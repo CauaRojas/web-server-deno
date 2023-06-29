@@ -62,7 +62,7 @@ const logAccess = async (ip: string) => {
 }
 
 async function handler(req: Request, conn: ConnInfo) {
-    const requestUrl = removeBaseUrl(req.url)
+    const _requestUrl = removeBaseUrl(req.url)
     logAccess((conn.remoteAddr as Deno.NetAddr).hostname)
     return new Response('Hello World!')
 }
