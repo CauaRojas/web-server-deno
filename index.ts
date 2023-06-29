@@ -1,10 +1,38 @@
 import { ConnInfo, serve } from 'https://deno.land/std@0.192.0/http/server.ts'
-
+const port = Deno.args[0]
+const filesFolder = Deno.args[1]
+const isPortInvalid = (port: string) => {
+    try {
+        parseInt(port)
+    } catch {
+        return true
+    }
+    return false
+}
+const doesFolderExist = (folderPath: string) => {
+    try {
+        Deno.readDirSync(folderPath)
+    } catch {
+        return true
+    }
+    return false
+}
+if (
+    !port ||
+    !filesFolder ||
+    isPortInvalid(port) ||
+    doesFolderExist(filesFolder)
+) {
+    console.log(
+        'Usage: ./web-server-dino PORT FILE_FOLDER_NAME\nExemple: ./web-server-dino 5000 web'
+    )
+    Deno.exit(2)
+}
 const removeBaseUrl = (url: string) =>
     url
         .split('/')
         .filter((_, index) => index > 2)
-        .join('')
+        .join('/')
 const logAccess = async (ip: string) => {
     const logPath = './log.txt'
     const logFile = await Deno.open(logPath, {
@@ -29,10 +57,8 @@ const logAccess = async (ip: string) => {
 }
 
 async function handler(req: Request, conn: ConnInfo) {
-    console.log(removeBaseUrl(req.url))
+    const requestUrl = removeBaseUrl(req.url)
     logAccess((conn.remoteAddr as Deno.NetAddr).hostname)
-    return new Response(
-        'Hello World! ' + (conn.remoteAddr as Deno.NetAddr).hostname
-    )
+    return new Response('Hello World!')
 }
-serve(handler, { port: 5000 })
+serve(handler, { port: parseInt(port) })
