@@ -1,14 +1,7 @@
 import { ConnInfo, serve } from 'https://deno.land/std@0.192.0/http/server.ts'
 const port = Deno.args[0]
 const filesFolder = Deno.args[1]
-const isPortInvalid = (port: string) => {
-    try {
-        parseInt(port)
-    } catch {
-        return true
-    }
-    return false
-}
+const isPortInvalid = (port: string) => isNaN(port as unknown as number)
 const doesFolderExist = (folderPath: string) => {
     try {
         Deno.readDirSync(folderPath)
@@ -17,16 +10,28 @@ const doesFolderExist = (folderPath: string) => {
     }
     return false
 }
-if (
-    !port ||
-    !filesFolder ||
-    isPortInvalid(port) ||
-    doesFolderExist(filesFolder)
-) {
+const errorExit = () => {
     console.log(
         'Usage: ./web-server-dino PORT FILE_FOLDER_NAME\nExemple: ./web-server-dino 5000 web'
     )
     Deno.exit(2)
+}
+
+if (!port) {
+    console.log('Please specify a valid port number')
+    errorExit()
+}
+if (!filesFolder) {
+    console.log('Please specify a file folder')
+    errorExit()
+}
+if (isPortInvalid(port)) {
+    console.log('Please enter a valid integer number as the port')
+    errorExit()
+}
+if (doesFolderExist(filesFolder)) {
+    console.log('Please enter an existing folder path')
+    errorExit()
 }
 const removeBaseUrl = (url: string) =>
     url
